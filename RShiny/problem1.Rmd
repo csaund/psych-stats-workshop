@@ -1,0 +1,99 @@
+---
+title: "Balaton 2019 Analysis"
+author: "csaund"
+date: "3/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(copBasic)
+```
+
+a) In preparation of tomorrow’s lecture on copulas, install the R package copBasic. Ensure that the package is working properly by loading it into the workspace and executing an example of the function COP() via example(COP).
+
+b) Createavectorx=(1583726)′. Useseq()tocreateanothervectoryofthe same length containing the odd numbers 1,3,5,... Compute a vector z as linear combination of x and y: z = 4x + 2y.
+```{r}
+x = c(1, 5, 8, 3, 7, 2, 6)
+y = seq(from=1, length.out=7, by=2)
+z = (4 * x) + (2 * y)
+```
+
+c) Combine the column vectors x, y, and z into a matrix A. Then create a matrix B with x, y, and z as row vectors. Compute the matrix product BA.
+```{r}
+A <- matrix(c(x, y, z), nrow=7, ncol=3, byrow=FALSE)
+B <- matrix(c(x, y, z), nrow=3, ncol=7, byrow=TRUE)
+
+BA = B %*% A
+```
+
+d) Create a data frame for 60 subjects and three factor variables:
+id subject ID with levels from 1 to 60
+type with levels “old” and “new” (mind the ordering!) condition with levels “A”, “B”, and “C”.
+Type and condition are crossed factors in a balanced design, so there are 10 subjects in each cell. Use the following functions on the resulting data frame to check its structure:
+􏰀 str()
+􏰀 summary()
+􏰀 table() or xtabs()
+```{r}
+level <- rep(c("old", "new"), times=1, each=30)
+condition <- rep(c("A", "B", "C"), times=2, each=10)
+id <- 1:60
+
+df <- data.frame(id, level, condition)
+
+```
+
+e) In an experiment, each subject has to respond to one stimulus and the subject’s reaction time is recorded. Assume that reaction time is normally distributed as RT ∼ N(μ = 400,σ2 = 625). Using rnorm(), simulate reaction times for all subjects and store them in an additional variable in the previously created data frame.
+Then use aggregate() to find the average reaction time in each of the six experi- mental conditions. Are there any suspiciously high or low cell means? Find out the minimum and maximum reaction time in each cell.
+```{r}
+df$RT <- rtnorm(60, 400, 625, a=0)
+  
+# can't have neg RTs
+# copied from SO
+rtnorm <- function(n, mean, sd, a = -Inf, b = Inf){
+    qnorm(runif(n, pnorm(a, mean, sd), pnorm(b, mean, sd)), mean, sd)
+}
+```
+
+f) Go to
+   http://socserv.socsci.mcmaster.ca/jfox/Books/Applied-Regression-3E/
+and download the Vocabulary.txt data set (Fox, 2008). Store it in a local folder on your computer. Set that folder as your working directory using setwd(). Use read.table() to load these data into R’s working memory. Hint: With ?read.table you can get documentation for this function.
+
+Use appropriate R functions to find out the number of observations, number of variables, variable names, descriptive statistics for the dependent variables, and the levels of the factor variables.
+```{r}
+vocab_dat <- read.table('Vocabulary.txt')
+
+num_obs <- nrow(vocab_dat)
+num_vars <- ncol(vocab_dat) - 1 ## ID is not a variable
+str(vocab_dat)
+## this gives basically all the information.
+```
+
+g) Extract the vocabulary variable from this dataframe and calculate its mean and standard deviation.
+```{r}
+vocab_vec <- as.numeric(vocab_dat$V5)
+vocab_mean <- mean(vocab_vec)
+vocab_sd <- sd(vocab_vec)
+```
+Look at the 217th row of the data frame and find out the following information: When was this person tested? For how long did this person go to school? What score did she have in the vocabulary test?
+```{r}
+# going to 217th row, but our first row is names so we might
+# actually be wanting to go to the 218th
+vocab_dat[217,]
+# 20040401  2004  Female  14  5
+```
+
+Extract only those cases who are male, were tested in 1974, and scored below 2 in the vocabulary test.
+```{r}
+#vocab_dat[V3 == "male" && V2 == "1974" && V5 < 2]
+
+vocab_dat[as.character(vocab_dat$V3) == "Male" && as.numeric(as.vocab_dat$V2) == 1974```
+
+h) Sort the data frame by “years of education” and within that by “vocabulary test score.” Hint: Use order(). On the sorted data frame, apply the functions head() and tail() to display the first and last 20 observations, respectively. What do you hypothesize about the relationship between “years of education” and “vocabulary test score?”
+
+i) Are there sex differences in “years of education” and “vocabulary test score?” To find out, calculate the mean values of both variables for men and women separately. Hint: Use aggregate().
+Check if “years of education” have increased over the last decades. Calculate their means for every “year of testing.”
+Reference
+Fox, J. (2008). Applied regression analysis and generalized linear models. Thousand Oaks: Sage Publications.

@@ -1,0 +1,34 @@
+---
+title: "Balaton 2019 Analysis"
+author: "csaund"
+date: "3/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(copBasic)
+```
+
+In a detection experiment, a person is presented with signal and noise trials and asked if he or she recognizes the signal:
+           response
+   trial    yes  no
+     noise   89 361
+     signal 330 120
+A measure of sensitivity is d′, which is defined within signal detection theory (SDT) as the difference between the means of two internal distributions (signal and noise distribution).
+
+```{r}
+trial <- c('noise','signal')
+yes <- c(89, 330)
+no <- c(361, 120)
+
+dat <- data.frame(trial, yes, no)
+
+p_hit <- 330 / (330 + 120)
+p_fa <- 89 / (89 + 361)
+# difference between the means of two internal distributions
+d_prime <- qnorm(p_hit) - qnorm(p_fa)
+```
+
