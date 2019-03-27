@@ -215,21 +215,27 @@ Specifically, investigate the difference between a positive and a negative field
 
 ```{r}
 omega <- matrix(0,5,5)
-mu <- rep(0,5)
-beta <- 10
+mu <- rep(1,5)
+beta <- 1
 
-hot.model <- ising(mu,omega,beta)
-print(hot.model)
+strong.model <- ising(mu,omega,beta)
+print(strong.model)
 ```
-
+whoa funky super strong external magnetic field (1s) makes probability of being in all 1 state super high. nifty.
 
 3. Using the base.model as a reference point, investigate how changes in the interactions influence the static behaviour of the Ising model.
 
 Specifically, investigate the difference between positive and negative interactions, and strong and a weak interactions. Start with the same values for ω for all variables, and gradually introduce differences in ω between variables. (Make sure that the diagonal of ω stays zero, and reset μ to its base values.)
 
 ```{r}
+omega <- matrix(1,5,5)
+mu <- c(0.5, -0.5, 0.5, -0.5, 0)
+beta <- 1
 
+interactions.model <- ising(mu,omega,beta)
+print(interactions.model)
 ```
+ahh so when they have very strong interdependence the probaiblities of states with all the same are higher. More signs the same way --> higher probability wow whodathunkit.
 
 4. Using the base.model as a reference point, investigate how changes in the temperature influence the static behaviour of the Ising model.
 
@@ -239,9 +245,15 @@ Now change the parameters for μ and/or ω to be different than zero, what happe
 
 How do differences in temperature, influence the properties of the Ising model.
 ```{r}
+omega <- matrix(0.5,5,5)
+mu <- c(0.5, -0.5, 0.5, -0.5, 0)
+beta <- 10
 
+hot.model <- ising(mu,omega,beta)
+print(hot.model)
 ```
-
+Heat exaggerates everything. 
+Also discovered a bug where probaililties can be above 0 lol oops.
 
 5. Try out different combinations of values for μ, ω and β, (and even the number of variables), do you discover intersting patterns? You can also try out the Ising model in differnt dimensions (1d: line, 2d: lattice).
 
