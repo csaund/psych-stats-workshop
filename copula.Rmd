@@ -1,0 +1,26 @@
+---
+title: "Balaton 2019 Copula"
+author: "csaund"
+date: "3/26/2019"
+output: html_document
+---
+
+```{r}
+library(copBasic)
+```
+
+
+```{r}
+# bivariate dist, projection onto one axis
+simCOP(n=100, cop=W)  # Lower Frechet bound
+
+simCOP(n=100, cop=M)  # Upper Frechet bound
+
+simCOP(n=100, cop=P)  # Independence copula
+
+simCOP(n=1000, cop=CLcop, para=10, na.rm=TRUE, keept=TRUE, # dont need keept
+       graphics=TRUE, ploton=TRUE, points=TRUE, snv=FALSE, # dont need snv
+       infsnv.rm=TRUE);
+```
+
+kendall's tau and spearman's rho are measure of dependency of statistics we use to compute margins for copula?

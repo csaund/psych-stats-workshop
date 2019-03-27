@@ -32,3 +32,13 @@ p_fa <- 89 / (89 + 361)
 d_prime <- qnorm(p_hit) - qnorm(p_fa)
 ```
 
+
+
+```{r}
+dplyr::mutate(iris, sepal = Sepal.Length + Sepal. Width)
+
+
+ %>%
+  mutate(sum = ess_1 + ess_2 + ess_3)
+```
+

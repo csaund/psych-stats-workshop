@@ -1,0 +1,106 @@
+---
+title: "Balaton 2019 Ising Models"
+author: "csaund"
+date: "3/26/2019"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+```
+
+1. Write the contents of the function below, such that, for a system of n variables, it takes a vector of length n with a particular configuration of (σ) (sigma), a vector of length n with the external magnetic field (mu), and a n by n matrix with the pairwise interactions as input, and returns the energy for this particular configuration.
+
+- sigma
+- mu
+- omega
+```{r}
+hamiltonian <- function(sigma, mu, omega)
+{
+  # -sum over i of (mu[i]sigma[i]) - sum over ij of (omega[i, j]sigma[i]sigma[j])
+  sum_mu_simga = 0
+  n = length(sigma)
+  for(i in 1:n) {
+    sum_mu_simga = sum_mu_simga + (sigma[i] * mu[i])
+  }
+  
+  sum_omega = 0
+  for(i in 1:n) {
+    for(j in 1:n) {
+      sum_omega = sum_omega + 
+                  (omega[i, j] * sigma[i] * sigma[j])
+    }
+  }
+  # need to divide sum_omega by two because we double-counted i-j, j-i
+  energy.x <- -sum_mu_simga - (sum_omega / 2)
+  return(energy.x)
+}
+```
+
+1. 
+```{r}
+x = c(1,1,-1)
+mu = c(0,0,0)
+omega = matrix(c(0,1,-1,
+                 1,0,0,
+                 -1,0,0),3,3)
+
+E1 <- hamiltonian(x,mu,omega) 
+print(E1) # -2
+
+mu = c(0,.587,.123)
+
+E2 <- hamiltonian(x,mu,omega) 
+print(E2) # -2.464
+```
+
+
+
+2. The probability of a system being in a particular state is given by the Boltzmann function:
+
+P(σ)= (1/Z) * (exp(−βH(σ))),
+
+where Z sums over all 2n possible configurations of a system.
+
+```{r}
+get_configs <- function(item1, item2, cols) {
+  mat <- as.matrix(expand.grid(rep(list(c(item1,item2)),cols)))
+  return(mat)
+}
+
+as.vector(get_configs(-1,1,3)[2,])
+
+```
+Write the contents of the function below, such that, for a system of n variables, it takes a vector of length n with a particular configuration of (σ) (sigma), a vector of length n with the external magnetic field (mu), a n by n matrix with the pairwise interactions, and scalar with the inverse temperature (beta) of the system as input, and returns the probability for observing this particular configuration. Use both the hamiltonian function from 1a, and the function created in 2a.
+
+```{r}
+boltzmann <- function(sigma, mu, omega, beta)
+{
+  # Z <- 1 / (all_configs(-1,1,length(sigma)))
+  Z = 0
+  all_configs <- get_configs(-1,1,3)
+  for(i in nrow(all_configs)) {
+    Z = Z + 
+        exp(hamiltonian(as.vector(all_configs[i,]), mu, omega))
+  }
+  probability.x <- (1 / Z) * exp(-beta * hamiltonian(sigma, mu, omega))
+  return(probability.x)
+}
+
+
+## checks
+x = c(1,1,-1)
+mu = c(0,0,0)
+omega = matrix(c(0,1,-1,
+                 1,0,0,
+                 -1,0,0),3,3)
+beta = 1
+P1 <- boltzmann(x,mu,omega,beta) 
+print(P1) # 0.3879017
+
+mu = c(0,.587,.123)
+
+P2 <- boltzmann(x,mu,omega,beta) 
+print(P2) # 0.5403266
+```
