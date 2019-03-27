@@ -69,18 +69,19 @@ get_configs <- function(item1, item2, cols) {
   return(mat)
 }
 
-as.vector(get_configs(-1,1,3)[2,])
+mat <- get_configs(-1,1,3)
+
+cbind(mat, "energy"=numeric(8))
 
 ```
 Write the contents of the function below, such that, for a system of n variables, it takes a vector of length n with a particular configuration of (σ) (sigma), a vector of length n with the external magnetic field (mu), a n by n matrix with the pairwise interactions, and scalar with the inverse temperature (beta) of the system as input, and returns the probability for observing this particular configuration. Use both the hamiltonian function from 1a, and the function created in 2a.
 
 ```{r}
-boltzmann <- function(sigma, mu, omega, beta)
-{
-  # Z <- 1 / (all_configs(-1,1,length(sigma)))
+## I think there's a negative sign flipped somewhere here
+boltzmann <- function(sigma, mu, omega, beta) {
   Z = 0
-  all_configs <- get_configs(-1,1,3)
-  for(i in nrow(all_configs)) {
+  all_configs <- get_configs(-1,1,length(sigma))
+  for(i in 1:nrow(all_configs)) {
     Z = Z + 
         exp(hamiltonian(as.vector(all_configs[i,]), mu, omega))
   }
@@ -103,4 +104,147 @@ mu = c(0,.587,.123)
 
 P2 <- boltzmann(x,mu,omega,beta) 
 print(P2) # 0.5403266
+```
+
+
+3. Combine all code written for the previous sections to create a function that takes:
+-a vector of length n with the external magnetic field (mu), 
+-a n by n matrix with the pairwise interactions, 
+-scalar with the inverse temperature (beta) of the system as input, 
+
+-returns a matrix containing:  
+  - for each of the 2n possible configurations of the system, 
+      - the configuration (x), 
+      - the energy (H(x)) of this configuration, 
+      - the boltzmann value (exp(−βH(x))) of this configuration, 
+      - the probability of this configuration (P(x)).
+```{r}
+ising <- function(mu, omega, beta) {
+  n = length(mu)
+  all_configs <- get_configs(-1, 1, n)
+  
+  ## just set these up for funsies
+  energies = numeric(2 ** n)
+  boltz = numeric(2 ** n)
+  probs = numeric(2 ** n)
+  
+  for(i in 1:nrow(all_configs)) {
+    sigma = as.vector(all_configs[i,])
+    energies[i] = hamiltonian(sigma, mu, omega)
+    boltz[i] = exp(hamiltonian(sigma, mu, omega))
+    probs[i] = boltzmann(sigma, mu, omega, beta)
+  }
+  
+  all_confs <- cbind(all_configs, Energy=energies)
+  all_confs <- cbind(all_confs, Boltzmann=boltz)
+  all_confs <- cbind(all_confs, Probability=probs)
+  
+  return(all_confs)
+}
+
+```
+
+```{r}
+## checks
+x = c(1,1,-1)
+mu = c(0,0,0)
+omega = matrix(c(0,1,-1,
+                 1,0,0,
+                 -1,0,0),3,3)
+beta = 1
+
+I1 <- ising(mu,omega,beta) 
+print(I1) 
+
+#      Var1 Var2 Var3 Energy Boltzmann Probability
+# [1,]   -1   -1   -1      0 1.0000000 0.052496793
+# [2,]    1   -1   -1      0 1.0000000 0.052496793
+# [3,]   -1    1   -1      2 0.1353353 0.007104668
+# [4,]    1    1   -1     -2 7.3890561 0.387901746
+# [5,]   -1   -1    1     -2 7.3890561 0.387901746
+# [6,]    1   -1    1      2 0.1353353 0.007104668
+# [7,]   -1    1    1      0 1.0000000 0.052496793
+# [8,]    1    1    1      0 1.0000000 0.052496793
+
+
+## Getting some iffy negative value flips here... 
+
+mu = c(0,.587,.123)
+
+I2 <- ising(mu,omega,beta)  
+print(I2) 
+
+#      Var1 Var2 Var3 Energy   Boltzmann Probability
+# [1,]   -1   -1   -1  0.710  0.49164420 0.022605060
+# [2,]    1   -1   -1  0.710  0.49164420 0.022605060
+# [3,]   -1    1   -1  1.536  0.21524034 0.009896427
+# [4,]    1    1   -1 -2.464 11.75172455 0.540326592
+# [5,]   -1   -1    1 -1.536  4.64596918 0.213614664
+# [6,]    1   -1    1  2.464  0.08509389 0.003912489
+# [7,]   -1    1    1 -0.710  2.03399126 0.093519854
+# [8,]    1    1    1 -0.710  2.03399126 0.093519854
+```
+#### I know my Boltzmann column cannae be trusted
+
+
+4. 
+
+```{r}
+omega <- matrix(0,5,5)
+mu <- rep(0,5)
+beta <- 1
+
+base.model <- ising(mu,omega,beta)
+print(base.model)
+```
+
+1. Use the output to calculate the following properties of the model:
+
+* the probability for each alternative to spin up/down in general
+
+* the distribution of the sum scores (e.g. if σ={−1,1,1,−1,1}→σ⎯⎯⎯=∑i=1nσi = 1)
+
+```{r}
+
+```
+
+
+2. Using the base.model as a reference point, investigate how changes in the external magnetic field influence the static behaviour of the Ising model.
+
+Specifically, investigate the difference between a positive and a negative field, a strong and a weak field. Start with the same values for μ for all variables, and gradually introduce differences in μ between variables.
+
+```{r}
+omega <- matrix(0,5,5)
+mu <- rep(0,5)
+beta <- 10
+
+hot.model <- ising(mu,omega,beta)
+print(hot.model)
+```
+
+
+3. Using the base.model as a reference point, investigate how changes in the interactions influence the static behaviour of the Ising model.
+
+Specifically, investigate the difference between positive and negative interactions, and strong and a weak interactions. Start with the same values for ω for all variables, and gradually introduce differences in ω between variables. (Make sure that the diagonal of ω stays zero, and reset μ to its base values.)
+
+```{r}
+
+```
+
+4. Using the base.model as a reference point, investigate how changes in the temperature influence the static behaviour of the Ising model.
+
+Specifically, investigate the difference between zero, low and high values for β. Start with the base model values for μ and ω, how do changes in β influence the model properties? Explain why this is the case.
+
+Now change the parameters for μ and/or ω to be different than zero, what happens now?
+
+How do differences in temperature, influence the properties of the Ising model.
+```{r}
+
+```
+
+
+5. Try out different combinations of values for μ, ω and β, (and even the number of variables), do you discover intersting patterns? You can also try out the Ising model in differnt dimensions (1d: line, 2d: lattice).
+
+```{r}
+
 ```
